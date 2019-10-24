@@ -16,7 +16,7 @@
     "deploy": "serverless deploy --aws-profile serverless-local --aws-s3-accelerate",
     "test:integration": "AWS_PROFILE=serverless-local TEST_MODE=handler jest ./tests/*",
     "test:acceptance": "TEST_MODE=http jest ./tests/*",
-    "seed": "AWS_PROFILE=serverless-local node seedGetTogethers.js dev-gettogethers"
+    "seed": "AWS_PROFILE=serverless-local node seedGetTogethers.js gettogethers"
   },
   "dependencies": {
     "aws-sdk": "^2.555.0"

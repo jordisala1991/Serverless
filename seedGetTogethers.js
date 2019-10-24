@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 AWS.config.region = 'eu-west-1';
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
-const tableName = process.argv.slice(2)[0];
+const tableName = `${process.env.TEST_STAGE}-${process.argv.slice(2)[0]}`;
 const items = [
   {
     id: 1,

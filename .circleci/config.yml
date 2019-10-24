@@ -1,0 +1,37 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.17
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - run:
+          name: Deploy application to sit
+          command: TEST_STAGE=sit yarn deploy
+
+      - run:
+          name: Recreate database
+          command: TEST_STAGE=sit yarn seed
+
+      - run:
+          name: Run integration tests
+          command: TEST_STAGE=sit yarn test:integration
+
+      - run:
+          name: Run acceptance tests
+          command: TEST_STAGE=sit yarn test:acceptance
