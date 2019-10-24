@@ -22,7 +22,7 @@ jobs:
 
       - run:
           name: Deploy application to sit
-          command: TEST_STAGE=sit yarn deploy
+          command: TEST_STAGE=sit yarn serverless deploy --aws-s3-accelerate
 
       - run:
           name: Recreate database
