@@ -7,10 +7,18 @@
   "license": "MIT",
   "devDependencies": {
     "jest": "^24.9.0",
-    "serverless": "^1.55.1"
+    "serverless": "^1.55.1",
+    "serverless-iam-roles-per-function": "^2.0.2",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "superagent": "^5.1.0"
   },
   "scripts": {
-    "serverless": "serverless --aws-profile serverless-local",
-    "test:integration": "jest ./tests/*"
+    "deploy": "serverless deploy --aws-profile serverless-local --aws-s3-accelerate",
+    "test:integration": "AWS_PROFILE=serverless-local TEST_MODE=handler jest ./tests/*",
+    "test:acceptance": "TEST_MODE=http jest ./tests/*",
+    "seed": "AWS_PROFILE=serverless-local node seedGetTogethers.js dev-gettogethers"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.555.0"
   }
 }
