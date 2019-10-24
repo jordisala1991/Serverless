@@ -1,6 +1,7 @@
-module.exports.handler = async () => {
-    return {
-        statusCode: 200,
-        body: 'Hello'
-    };
+module.exports.handler = async (event) => {
+    const orderPlaced = JSON.parse(event.Records[0].Sns.Message);
+
+    console.log(orderPlaced);
+
+    return 'all done';
 };

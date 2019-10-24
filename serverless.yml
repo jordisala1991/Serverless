@@ -14,9 +14,10 @@ custom:
   defaultRegion: eu-west-1
   defaultStage: dev${env:SLSUSER, ""}
   getTogethersTableName: ${self:provider.stage}-gettogethers
+  joinGetTogetherSnsTopicName: ${self:provider.stage}-joingettogether
 
 functions:
-  getTogethers:
+  getGetTogethers:
     handler: src/functions/getGetTogethers.handler
     events:
       - http:
@@ -28,10 +29,24 @@ functions:
         Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.getTogethersTableName}
     environment:
       getTogethersTableName: ${self:custom.getTogethersTableName}
+
+  joinGetTogether:
+    handler: src/function/joinGetTogether.handler
+    events:
+      - http:
+          path: api/join-get-togethers
+          method: post
+    environment:
+      joinGetTogetherSnsTopicName: ${self:custom.joinGetTogetherSnsTopicName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.joinGetTogetherSnsTopicName}
+
   notifyOrganiser:
     handler: src/functions/notifyOrganiser.handler
     events:
-      - sns: notifyOrganiser
+      - sns: ${self:custom.joinGetTogetherSnsTopicName}
 
 resources:
   Resources:
