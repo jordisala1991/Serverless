@@ -1,0 +1,16 @@
+{
+  "name": "serverless",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:jordisala1991/Serverless.git",
+  "author": "Jordi <jordism91@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "serverless": "^1.55.1"
+  },
+  "scripts": {
+    "serverless": "serverless --aws-profile serverless-local",
+    "test:integration": "jest ./tests/*"
+  }
+}
