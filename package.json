@@ -13,10 +13,10 @@
     "superagent": "^5.1.0"
   },
   "scripts": {
-    "deploy": "serverless deploy --aws-profile serverless-local --aws-s3-accelerate",
-    "test:integration": "AWS_PROFILE=serverless-local TEST_MODE=handler jest ./tests/*",
+    "deploy": "serverless deploy --aws-s3-accelerate",
+    "test:integration": "TEST_MODE=handler jest ./tests/*",
     "test:acceptance": "TEST_MODE=http jest ./tests/*",
-    "seed": "AWS_PROFILE=serverless-local node seedGetTogethers.js gettogethers"
+    "seed": "node seedGetTogethers.js gettogethers"
   },
   "dependencies": {
     "aws-sdk": "^2.555.0"

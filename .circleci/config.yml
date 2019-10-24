@@ -22,7 +22,7 @@ jobs:
 
       - run:
           name: Deploy application to sit
-          command: yarn serverless deploy --aws-s3-accelerate
+          command: yarn deploy
 
       - run:
           name: Recreate database
