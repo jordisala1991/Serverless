@@ -28,6 +28,10 @@ functions:
         Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.getTogethersTableName}
     environment:
       getTogethersTableName: ${self:custom.getTogethersTableName}
+  notifyOrganiser:
+    handler: src/functions/notifyOrganiser.handler
+    events:
+      - sns: notifyOrganiser
 
 resources:
   Resources:
