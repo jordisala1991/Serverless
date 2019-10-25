@@ -3,7 +3,7 @@ const when = require('./steps/when');
 describe('When we invoke the GET /api/get-togethers endpoint', () => {
   beforeAll(() => {
     process.env.AWS_REGION = 'eu-west-1';
-    process.env.getTogethersTableName = `${process.env.TEST_STAGE}-gettogethers`;
+    process.env.getTogethersTablePath = `/gettogethers/${process.env.TEST_STAGE}/secureTableName`;
   });
 
   test('It should return the right greeting', async () => {

@@ -15,7 +15,7 @@ const viaHttp = async (path) => {
   try {
     const httpReq = http('get', `${apiRoot}/${path}`);
     const response = await httpReq;
-  
+
     return {
       statusCode: response.status,
       body: response.body

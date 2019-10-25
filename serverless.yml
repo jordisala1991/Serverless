@@ -3,12 +3,25 @@ service: gettogether
 plugins:
   - serverless-pseudo-parameters
   - serverless-iam-roles-per-function
+  - serverless-plugin-tracing
 
 provider:
   name: aws
   runtime: nodejs10.x
   region: ${opt:region, self:custom.defaultRegion}
   stage: ${opt:stage, self:custom.defaultStage}
+  tracing: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: '*'
+
+package:
+  exclude:
+    - cloudwatch-logs-to-logzio/**
+    - tests/**
 
 custom:
   defaultRegion: eu-west-1
@@ -16,6 +29,8 @@ custom:
   getTogethersTableName: ${self:provider.stage}-gettogethers
   joinGetTogetherSnsTopicName: ${self:provider.stage}-joingettogether
   joinGetTogetherSnsTopic: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.joinGetTogetherSnsTopicName}
+  joinGetTogetherDQLSnsTopicName: ${self:provider.stage}-joingettogetherdql
+  joinGetTogetherDQLSnsTopic: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.joinGetTogetherDQLSnsTopicName}
 
 functions:
   getGetTogethers:
@@ -24,12 +39,16 @@ functions:
       - http:
           path: api/get-togethers
           method: get
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:scan
         Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.getTogethersTableName}
+      - Effect: Allow
+        Action: ssm:GetParameters*
+        Resource: arn:aws:ssm:#{AWS::Region}:#{AWS::AccountId}:parameter/gettogethers/${self:provider.stage}/*
     environment:
-      getTogethersTableName: ${self:custom.getTogethersTableName}
+      getTogethersTablePath: /gettogethers/${self:provider.stage}/secureTableName
 
   joinGetTogether:
     handler: src/functions/joinGetTogether.handler
@@ -37,6 +56,7 @@ functions:
       - http:
           path: api/join-get-togethers
           method: post
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action: sns:Publish
@@ -48,8 +68,20 @@ functions:
     handler: src/functions/notifyOrganiser.handler
     events:
       - sns: ${self:custom.joinGetTogetherSnsTopicName}
+    onError: ${self:custom.joinGetTogetherDQLSnsTopic}
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: ${self:custom.joinGetTogetherDQLSnsTopic}
+
+  notifyOrganiserDLQ:
+    handler: src/functions/notifyOrganiserDLQ.handler
+    events:
+      - sns: ${self:custom.joinGetTogetherDQLSnsTopicName}
 
 resources:
+  Transform: AWS::Serverless-2016-10-31
   Resources:
     GetTogethersTable:
       Type: AWS::DynamoDB::Table
@@ -62,3 +94,13 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    SubscribeToApiGatewayLogs:
+      Type: AWS::Serverless::Application
+      Properties:
+        Location:
+          ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-subscribe-log-group-to-arn
+          SemanticVersion: 1.9.3
+        Parameters:
+          DestinationArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cloudwatch-logs-to-logzio-bcn-${self:provider.stage}-ship-logs-to-logzio
+          Prefix: /aws/lambda
+          OverrideManualConfigs: true

@@ -1,11 +1,13 @@
-const AWS = require('aws-sdk');
+const AWSXray = require('aws-xray-sdk');
+const AWS = AWSXray.captureAWS(require('aws-sdk'));
+const middy = require('middy');
+const { ssm } = require('middy/middlewares');
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
-const tableName = process.env.getTogethersTableName;
 
-module.exports.handler = async () => {
+const handler = async (event, context) => {
   const request = {
-    TableName: tableName,
+    TableName: context.tableName,
     Limit: 8
   };
 
@@ -16,3 +18,14 @@ module.exports.handler = async () => {
     body: JSON.stringify(response.Items)
   };
 };
+
+module.exports.handler = middy(handler).use(
+  ssm({
+    cache: true,
+    cacheExpiryInMillis: 3 * 60 * 1000,
+    setToContext: true,
+    names: {
+      tableName: `${process.env.getTogethersTablePath}`
+    }
+  })
+);

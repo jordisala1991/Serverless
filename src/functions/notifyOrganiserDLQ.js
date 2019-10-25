@@ -9,11 +9,7 @@ const log = require('@dazn/lambda-powertools-logger');
 const handler = async (event) => {
   const orderPlaced = JSON.parse(event.Records[0].Sns.Message);
 
-  if (orderPlaced.getTogetherId == 'error') {
-    throw new Error('Simulate error');
-  }
-
-  log.info("notified 'join_getTogether' to organisers", { orderPlaced });
+  log.info("notified dql 'join_getTogether'", { orderPlaced });
 
   return 'all done';
 };

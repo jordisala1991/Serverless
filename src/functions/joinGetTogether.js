@@ -1,25 +1,33 @@
-const AWS = require('aws-sdk');
-const sns = new AWS.SNS();
+const AWSXray = require('aws-xray-sdk');
+
+AWSXray.captureAWS(require('aws-sdk'));
+
+const SNS = require('@dazn/lambda-powertools-sns-client')
 const chance = require('chance').Chance();
+const log = require('@dazn/lambda-powertools-logger');
+const middy = require('middy');
+const correlationIds = require('@dazn/lambda-powertools-middleware-correlation-ids');
 
-module.exports.handler = async (event) => {
+const handler = async (event) => {
   const parsedBody = JSON.parse(event.body);
-  const orderId = chance.guid();
-
-  const params = {
-    Message: JSON.stringify({
-      getTogetherId: parsedBody.getTogetherId,
-      userEmail: parsedBody.userEmail,
-      orderId
-    }),
-    TopicArn: process.env.joinGetTogetherSnsTopic
+  const message = {
+    getTogetherId: parsedBody.getTogetherId,
+    userEmail: parsedBody.userEmail,
+    orderId: chance.guid()
   };
-  
-  const response = await sns.publish(params).promise();
-  console.log(response);
+
+  await SNS.publish({
+    Message: JSON.stringify(message),
+    TopicArn: process.env.joinGetTogetherSnsTopic
+  }).promise();
+
+  log.info("published 'join_getTogether' event", message);
 
   return {
       statusCode: 200,
-      body: JSON.stringify({orderId})
+      body: JSON.stringify(message)
   }
 };
+
+module.exports.handler = middy(handler)
+  .use(correlationIds({ sampleDebugLogRate: 0 }));
