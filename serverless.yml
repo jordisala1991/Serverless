@@ -49,6 +49,7 @@ functions:
         Resource: arn:aws:ssm:#{AWS::Region}:#{AWS::AccountId}:parameter/gettogethers/${self:provider.stage}/*
     environment:
       getTogethersTablePath: /gettogethers/${self:provider.stage}/secureTableName
+      functionShieldToken: anNhbGFAcnVucm9vbS5jb20AMEUCIQCa7gFoVaPVIJaqsTWfNvrBzFx0DwJslw3NSKhLH6CftAIgV8Z1Z7RBpUYTmnn9H+yeGbLBCm0VPc861RJ2snogXbU=
 
   joinGetTogether:
     handler: src/functions/joinGetTogether.handler

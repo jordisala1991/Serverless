@@ -1,9 +1,21 @@
+const http = require('http');
 const AWSXray = require('aws-xray-sdk');
 const AWS = AWSXray.captureAWS(require('aws-sdk'));
 const middy = require('middy');
 const { ssm } = require('middy/middlewares');
+const FunctionShield = require('@puresec/function-shield');
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
+FunctionShield.configure({
+  policy: {
+    outbound_connectivity: 'alert',
+    read_write_tmp: 'block',
+    create_child_process: 'block',
+    read_handler: 'block'
+  },
+  token: process.env.functionShieldToken
+});
 
 const handler = async (event, context) => {
   const request = {
