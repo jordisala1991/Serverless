@@ -9,6 +9,8 @@ module.exports.handler = async () => {
     Limit: 8
   };
 
+  console.log(request);
+
   const response = await dynamoDB.scan(request).promise();
 
   return {
